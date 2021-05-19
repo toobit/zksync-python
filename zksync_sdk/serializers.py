@@ -195,6 +195,10 @@ def serialize_account_id(account_id: int):
     return int_to_bytes(account_id, 4)
 
 
+def serialize_chain_id(chain_id: int):
+    return int_to_bytes(chain_id, 1)
+
+
 def remove_address_prefix(address: str) -> str:
     if address.startswith('0x'):
         return address[2:]

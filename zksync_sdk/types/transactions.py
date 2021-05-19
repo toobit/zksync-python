@@ -7,7 +7,7 @@ from typing import List, Optional, Union
 from pydantic import BaseModel
 
 from zksync_sdk.serializers import (int_to_bytes, packed_amount_checked, packed_fee_checked,
-                                    serialize_account_id,
+                                    serialize_account_id, serialize_chain_id,
                                     serialize_address, serialize_nonce, serialize_timestamp,
                                     serialize_token_id, )
 from zksync_sdk.types.signatures import TxEthSignature, TxSignature
@@ -78,7 +78,7 @@ class Token(BaseModel):
 
         # zero is the only exception where we don't add a decimal point
         if d == 0:
-            return "0"
+            return "0.0"
 
         # Creates a string with `self.decimals` numbers after decimal point.
         # Prevents scientific notation (string values like '1E-8').
@@ -225,6 +225,7 @@ class Transfer(EncodedTx):
     amount: int
     fee: int
     nonce: int
+    chainId: int
     valid_from: int
     valid_until: int
     signature: TxSignature = None
@@ -233,7 +234,7 @@ class Transfer(EncodedTx):
         return 5
 
     def human_readable_message(self) -> str:
-        message = f"Transfer {self.token.decimal_str_amount(self.amount)} {self.token.symbol} to: {self.to_address.lower()}\nFee: {self.token.decimal_str_amount(self.fee)} {self.token.symbol}\nNonce: {self.nonce}"
+        message = f"Transfer {self.token.decimal_str_amount(self.amount)} {self.token.symbol}\nTo: {self.to_address.lower()}\nChainId {self.chainId}\nNonce: {self.nonce}\nFee: {self.token.decimal_str_amount(self.fee)} {self.token.symbol}\nAccount Id: {self.account_id}"
         return message
 
     def encoded_message(self) -> bytes:
@@ -245,9 +246,8 @@ class Transfer(EncodedTx):
             serialize_token_id(self.token.id),
             packed_amount_checked(self.amount),
             packed_fee_checked(self.fee),
+            serialize_chain_id(self.chainId),
             serialize_nonce(self.nonce),
-            serialize_timestamp(self.valid_from),
-            serialize_timestamp(self.valid_until)
         ])
 
     def dict(self):
@@ -257,12 +257,11 @@ class Transfer(EncodedTx):
             "from":       self.from_address,
             "to":         self.to_address,
             "token":      self.token.id,
-            "fee":        self.fee,
+            "amount":     str(self.amount),
+            "fee":        str(self.fee),
+            "chainId":      self.chainId,
             "nonce":      self.nonce,
             "signature":  self.signature.dict(),
-            "amount":     self.amount,
-            "validFrom":  self.valid_from,
-            "validUntil": self.valid_until,
         }
 
 
@@ -274,6 +273,7 @@ class Withdraw(EncodedTx):
     amount: int
     fee: int
     nonce: int
+    chainId: int
     valid_from: int
     valid_until: int
     token: Token
@@ -283,7 +283,7 @@ class Withdraw(EncodedTx):
         return 3
 
     def human_readable_message(self) -> str:
-        message = f"Withdraw {self.token.decimal_str_amount(self.amount)} {self.token.symbol} to: {self.to_address.lower()}\nFee: {self.token.decimal_str_amount(self.fee)} {self.token.symbol}\nNonce: {self.nonce}"
+        message = f"Withdraw {self.token.decimal_str_amount(self.amount)} {self.token.symbol}\nTo: {self.to_address.lower()}\nChainId {self.chainId}\nNonce: {self.nonce}\nFee: {self.token.decimal_str_amount(self.fee)} {self.token.symbol}\nAccount Id: {self.account_id}"
         return message
 
     def encoded_message(self) -> bytes:
@@ -295,9 +295,8 @@ class Withdraw(EncodedTx):
             serialize_token_id(self.token.id),
             int_to_bytes(self.amount, length=16),
             packed_fee_checked(self.fee),
+            serialize_chain_id(self.chainId),
             serialize_nonce(self.nonce),
-            serialize_timestamp(self.valid_from),
-            serialize_timestamp(self.valid_until)
         ])
 
     def dict(self):
@@ -307,12 +306,11 @@ class Withdraw(EncodedTx):
             "from":       self.from_address,
             "to":         self.to_address,
             "token":      self.token.id,
-            "fee":        self.fee,
+            "amount":     str(self.amount),
+            "fee":        str(self.fee),
+            "chainId":      self.chainId,
             "nonce":      self.nonce,
             "signature":  self.signature.dict(),
-            "amount":     self.amount,
-            "validFrom":  self.valid_from,
-            "validUntil": self.valid_until,
         }
 
 

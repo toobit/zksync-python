@@ -6,7 +6,7 @@ from .transactions import *
 
 
 class ChainId(IntEnum):
-    MAINNET = 1
+    MAINNET = 10
     RINKEBY = 4
     ROPSTEN = 3
     LOCALHOST = 9

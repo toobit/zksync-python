@@ -1,5 +1,6 @@
 from eth_account.messages import encode_defunct
 from eth_account.signers.base import BaseAccount
+from pycoin.serialize import h2b, b2h
 
 from zksync_sdk import ZkSyncLibrary
 from zksync_sdk.types import ChainId, EncodedTx, TxSignature
@@ -16,7 +17,7 @@ def derive_private_key(library: ZkSyncLibrary, message: str, account: BaseAccoun
 
 
 class ZkSyncSigner:
-    MESSAGE = "Access zkSync account.\n\nOnly sign this message for a trusted client!"
+    MESSAGE = "Access ZKSwap account.\n\nOnly sign this message for a trusted client!"
 
     def __init__(self, library: ZkSyncLibrary, private_key: bytes):
         self.library = library
